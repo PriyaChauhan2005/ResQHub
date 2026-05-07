@@ -23,9 +23,40 @@ const assertValidResponder = async (responderId) => {
 const createIncident = asyncHandler(async (req, res) => {
   const { title, description, severity, location } = req.body;
 
+  // 🔐 BASIC VALIDATION
+  if (!title || !severity || !location) {
+    throw createHttpError(400, "Title, severity and location are required.");
+  }
+
+  if (severity === "HIGH" && !description) {
+  throw createHttpError(400, "Description is required for high severity incidents.");
+}
+
+const finalDescription = description || "No additional details provided";
+
+  if (
+    typeof location.lat !== "number" ||
+    typeof location.lng !== "number"
+  ) {
+    throw createHttpError(400, "Invalid location coordinates.");
+  }
+
+  const existing = await Incident.findOne({
+    title,
+    "location.lat": location.lat,
+    "location.lng": location.lng,
+    createdAt: {
+      $gte: new Date(Date.now() - 10 * 60 * 1000),
+    },
+  });
+
+  if (existing) {
+    throw createHttpError(400, "Similar incident already reported recently.");
+  }
+
   const incident = await Incident.create({
     title,
-    description,
+    description : finalDescription,
     severity,
     location,
     status: "PENDING",

@@ -113,7 +113,7 @@ export default function ZoneManagement() {
   return (
     <div className="space-y-8">
 
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white">
             Zone Intelligence Panel
@@ -131,15 +131,15 @@ export default function ZoneManagement() {
         </button>
       </div>
 
-      <div className="grid grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 lg:gap-8">
 
         {/* MAP */}
-        <div className="col-span-8 bg-[#121f32] rounded-2xl p-4 border border-blue-500/10 shadow-xl">
+        <div className="xl:col-span-8 bg-[#121f32] rounded-2xl p-3 sm:p-4 border border-blue-500/10 shadow-xl">
 
           <MapContainer
             center={[28.6139, 77.209]}
             zoom={12}
-            className="h-[500px] w-full rounded-xl"
+            className="h-[320px] sm:h-[420px] lg:h-[500px] w-full rounded-xl"
           >
             <TileLayer
               url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
@@ -178,7 +178,7 @@ export default function ZoneManagement() {
         </div>
 
         {/* RIGHT PANEL */}
-        <div className="col-span-4 bg-[#121f32] rounded-2xl p-6 border border-blue-500/10 shadow-xl">
+        <div className="xl:col-span-4 bg-[#121f32] rounded-2xl p-4 sm:p-6 border border-blue-500/10 shadow-xl">
 
           {!selectedZone ? (
             <p className="text-slate-400 text-sm">

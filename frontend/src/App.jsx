@@ -90,7 +90,7 @@ function App() {
   };
 
   return (
-    <div className="relative min-h-screen">
+    <div className="relative min-h-screen overflow-x-hidden">
 
       <Routes>
         {/* PUBLIC */}
@@ -152,7 +152,7 @@ function App() {
       </Routes>
 
       {/* 🚨 GLOBAL LONG PRESS SOS BUTTON */}
-      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-center">
+      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex flex-col items-center">
         <button
           onMouseDown={startHold}
           onMouseUp={stopHold}
@@ -160,7 +160,7 @@ function App() {
           onTouchStart={startHold}
           onTouchEnd={stopHold}
           className="relative bg-red-600 hover:bg-red-700 text-white 
-          font-bold px-6 py-4 rounded-full shadow-2xl 
+          font-bold px-4 py-3 sm:px-6 sm:py-4 rounded-full shadow-2xl 
           shadow-red-600/40 transition transform hover:scale-110 overflow-hidden"
         >
           SOS

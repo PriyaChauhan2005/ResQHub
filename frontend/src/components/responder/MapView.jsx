@@ -13,7 +13,31 @@ L.Icon.Default.mergeOptions({
     "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
-export default function MapView() {
+const createIcon = (color) =>
+  new L.Icon({
+    iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-${color}.png`,
+    shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+  });
+
+const severityIcon = (severity) => {
+  if (severity === "HIGH") return createIcon("red");
+  if (severity === "MEDIUM") return createIcon("orange");
+  return createIcon("blue");
+};
+
+const userIcon = createIcon("blue");
+
+export default function MapView({ incidents = [], userLocation = null }) {
+  const mappedIncidents = incidents.filter(
+    (incident) =>
+      incident?.location &&
+      incident.location?.lat != null &&
+      incident.location?.lng != null
+  );
+
   return (
     <MapContainer
       center={[28.6139, 77.209]}
@@ -29,13 +53,33 @@ export default function MapView() {
       {/* MUST BE INSIDE */}
       <MapControls />
 
-      <Marker position={[28.6239, 77.219]}>
-        <Popup>High Severity Fire Reported</Popup>
-      </Marker>
+      {mappedIncidents.map((incident) => (
+        <Marker
+          key={incident.id}
+          position={[incident.location.lat, incident.location.lng]}
+          icon={severityIcon(incident.severity)}
+        >
+          <Popup>
+            <div className="space-y-1">
+              <p className="font-bold text-sm">
+                {incident.title || "Untitled Incident"}
+              </p>
+              <p className="text-xs text-slate-500">
+                Severity: {incident.severity || "LOW"}
+              </p>
+              <p className="text-xs">
+                Status: {incident.status || "PENDING"}
+              </p>
+            </div>
+          </Popup>
+        </Marker>
+      ))}
 
-      <Marker position={[28.6039, 77.199]}>
-        <Popup>Your Unit Location</Popup>
-      </Marker>
+      {userLocation && (
+        <Marker position={userLocation} icon={userIcon}>
+          <Popup>Your Unit Location</Popup>
+        </Marker>
+      )}
     </MapContainer>
   );
 }

@@ -176,7 +176,7 @@ const surgeDetected = useMemo(() => {
       </div>
 
       {/* ================= PERFORMANCE METRICS ================= */}
-      <div className="grid grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
         <StatCard title="Avg Resolution" value={`${resolutionStats.avg} min`} />
         <StatCard title="Fastest" value={`${resolutionStats.fastest} min`} />
         <StatCard title="Slowest" value={`${resolutionStats.slowest} min`} />
@@ -189,7 +189,7 @@ const surgeDetected = useMemo(() => {
           Incident Trend Over Time
         </h2>
 
-        <div className="h-[300px]">
+        <div className="h-[260px] sm:h-[300px]">
           <ResponsiveContainer>
             <LineChart data={trendData}>
               <CartesianGrid stroke="#1e2f44" />
@@ -210,15 +210,15 @@ const surgeDetected = useMemo(() => {
       </div>
 
       {/* ================= TWO COLUMN CHARTS ================= */}
-      <div className="grid grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 lg:gap-8">
 
         {/* Severity Bar */}
-        <div className="col-span-6 bg-[#121f32] rounded-2xl p-6 border border-blue-500/10 shadow-xl">
+        <div className="xl:col-span-6 bg-[#121f32] rounded-2xl p-4 sm:p-6 border border-blue-500/10 shadow-xl">
           <h2 className="text-lg font-semibold text-white mb-6">
             Severity Distribution
           </h2>
 
-          <div className="h-[300px]">
+          <div className="h-[260px] sm:h-[300px]">
             <ResponsiveContainer>
               <BarChart data={severityData}>
                 <CartesianGrid stroke="#1e2f44" />
@@ -232,12 +232,12 @@ const surgeDetected = useMemo(() => {
         </div>
 
         {/* Status Donut */}
-        <div className="col-span-6 bg-[#121f32] rounded-2xl p-6 border border-blue-500/10 shadow-xl">
+        <div className="xl:col-span-6 bg-[#121f32] rounded-2xl p-4 sm:p-6 border border-blue-500/10 shadow-xl">
           <h2 className="text-lg font-semibold text-white mb-6">
             Status Distribution
           </h2>
 
-          <div className="h-[300px]">
+          <div className="h-[260px] sm:h-[300px]">
             <ResponsiveContainer>
               <PieChart>
                 <Pie
@@ -263,7 +263,7 @@ const surgeDetected = useMemo(() => {
       </div>
 
       {/* ================= RESPONDER RANKING ================= */}
-<div className="bg-[#121f32] rounded-2xl p-6 border border-blue-500/10 shadow-xl relative">
+<div className="bg-[#121f32] rounded-2xl p-4 sm:p-6 border border-blue-500/10 shadow-xl relative">
 
   {surgeDetected && (
     <div className="absolute top-4 right-4 bg-red-500/20 text-red-400 px-4 py-2 text-xs rounded-full animate-pulse">
@@ -275,7 +275,7 @@ const surgeDetected = useMemo(() => {
     Responder Ranking (Resolved Cases)
   </h2>
 
-  <div className="h-[300px]">
+  <div className="h-[260px] sm:h-[300px]">
     <ResponsiveContainer>
       <BarChart data={rankingData}>
         <CartesianGrid stroke="#1e2f44" />

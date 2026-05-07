@@ -29,6 +29,8 @@ export default function Dashboard() {
   const [manualLocation, setManualLocation] = useState("");
   const [locationError, setLocationError] = useState(false);
   const [highlightedId, setHighlightedId] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [detectingLocation, setDetectingLocation] = useState(false);
 
 
   const { addIncident, incidents } = useIncidents();
@@ -43,8 +45,10 @@ const allIncidents = [...incidents, ...offlineIncidents];
 
   // Detect Location
   const detectLocation = () => {
+  setDetectingLocation(true);
   if (!navigator.geolocation) {
     setLocationError(true);
+    setDetectingLocation(false);
     return;
   }
 
@@ -55,20 +59,22 @@ const allIncidents = [...incidents, ...offlineIncidents];
         lng: position.coords.longitude,
       });
       setLocationError(false);
+      setDetectingLocation(false);
     },
     () => {
       setLocationError(true);
+      setDetectingLocation(false);
     }
   );
 };
 
 
   // Submit Form
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
   e.preventDefault();
 
-  if (!description || (!location && !manualLocation)) {
-  alert("Please add description and provide location");
+ if (!location && !manualLocation) {
+  alert("Please provide location");
   return;
 }
 
@@ -109,7 +115,16 @@ const allIncidents = [...incidents, ...offlineIncidents];
   }
 
   // 🟢 ONLINE MODE (normal flow)
-  addIncident(newIncident);
+  setSubmitting(true);
+  const created = await addIncident(newIncident);
+  setSubmitting(false);
+
+  if (!created) {
+    alert("Failed to submit emergency report.");
+    return;
+  }
+
+  alert("Emergency report submitted successfully.");
 
   setDescription("");
   setLocation(null);
@@ -269,10 +284,10 @@ useEffect(() => {
             {/* Description */}
             <div className="space-y-2">
               <label className="text-xs font-bold text-slate-500 uppercase flex justify-between">
-                Description
-                <span className="text-blue-400 normal-case font-normal italic">
+                Description (optional)
+                {/* <span className="text-blue-400 normal-case font-normal italic">
                   AI-assisted detection active
-                </span>
+                </span> */}
               </label>
 
               <textarea
@@ -280,7 +295,7 @@ useEffect(() => {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 className="w-full bg-slate-800 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm p-4"
-                placeholder="Describe what's happening..."
+                placeholder="Add details if possible..."
               />
             </div>
 
@@ -306,9 +321,10 @@ useEffect(() => {
   <button
     type="button"
     onClick={detectLocation}
-    className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-lg shadow-blue-600/20"
+    disabled={detectingLocation}
+    className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-lg shadow-blue-600/20 disabled:opacity-60"
   >
-    Detect My Location
+    {detectingLocation ? "Loading..." : "Detect My Location"}
   </button>
 
   {/* 🔴 Manual Location Fallback */}
@@ -331,18 +347,12 @@ useEffect(() => {
             {/* Submit */}
 <button
   type="submit"
+  disabled={submitting}
   className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl font-bold text-lg shadow-xl shadow-blue-600/20 transition-all"
 >
-  SUBMIT EMERGENCY REPORT
+  {submitting ? "Loading..." : "SUBMIT EMERGENCY REPORT"}
 </button>
 
-{/* Temporary Navigation Button for Testing */}
-<Link
-  to="/responder/dashboard"
-  className="block text-center bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-semibold mt-4 transition"
->
-  Go To Responder Dashboard
-</Link>
           </form>
         </section>
 

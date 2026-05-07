@@ -1,8 +1,8 @@
 /* eslint react-refresh/only-export-components: off */
 import { createContext, useContext, useState, useEffect } from "react";
+import { apiRequest } from "../utils/api";
 
 const IncidentContext = createContext();
-const API_BASE_URL = "http://localhost:5000/api";
 
 const normalizeIncident = (incident) => {
   if (!incident) return null;
@@ -25,39 +25,7 @@ export function IncidentProvider({ children }) {
   const [incidents, setIncidents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
-  const getAuthToken = () => {
-    const fromToken = localStorage.getItem("token");
-    if (fromToken) return fromToken;
-
-    const currentUser = JSON.parse(localStorage.getItem("currentUser") || "null");
-    return currentUser?.token || null;
-  };
-
-  const apiRequest = async (path, options = {}) => {
-    const token = getAuthToken();
-    const headers = {
-      "Content-Type": "application/json",
-      ...(options.headers || {}),
-    };
-
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
-    }
-
-    const response = await fetch(`${API_BASE_URL}${path}`, {
-      ...options,
-      headers,
-    });
-
-    const payload = await response.json().catch(() => ({}));
-
-    if (!response.ok) {
-      throw new Error(payload?.message || "Request failed");
-    }
-
-    return payload;
-  };
+  const [requesting, setRequesting] = useState(false);
 
   const fetchIncidents = async () => {
     setLoading(true);
@@ -85,7 +53,7 @@ export function IncidentProvider({ children }) {
   }, []);
 
   const addIncident = async (incident) => {
-    setLoading(true);
+    setRequesting(true);
     setError(null);
 
     const fallbackLocation = { lat: 28.6139, lng: 77.209 };
@@ -120,11 +88,12 @@ export function IncidentProvider({ children }) {
       setError(err.message || "Failed to create incident.");
       return null;
     } finally {
-      setLoading(false);
+      setRequesting(false);
     }
   };
 
   const updateStatus = async (id, newStatus, responderName = null) => {
+    setRequesting(true);
     setError(null);
 
     try {
@@ -144,10 +113,13 @@ export function IncidentProvider({ children }) {
     } catch (err) {
       setError(err.message || "Failed to update incident.");
       return null;
+    } finally {
+      setRequesting(false);
     }
   };
 
   const overrideAssign = async (id, responderName) => {
+    setRequesting(true);
     setError(null);
 
     try {
@@ -169,6 +141,8 @@ export function IncidentProvider({ children }) {
     } catch (err) {
       setError(err.message || "Failed to reassign incident.");
       return null;
+    } finally {
+      setRequesting(false);
     }
   };
 
@@ -181,6 +155,7 @@ export function IncidentProvider({ children }) {
       value={{
         incidents,
         loading,
+        requesting,
         error,
         refreshIncidents: fetchIncidents,
         addIncident,

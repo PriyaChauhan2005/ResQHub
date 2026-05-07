@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useIncidents } from "../../context/IncidentContext";
+import { apiRequest } from "../../utils/api";
 
 export default function Responders() {
   const [responders, setResponders] = useState([]);
@@ -8,8 +9,7 @@ export default function Responders() {
   const [selectedAssigneeByIncidentId, setSelectedAssigneeByIncidentId] = useState(
     {}
   );
-  const { incidents, overrideAssign } = useIncidents();
-  const API_BASE_URL = "http://localhost:5000/api";
+  const { incidents, overrideAssign, requesting } = useIncidents();
 
   // ================= LOAD RESPONDERS =================
   useEffect(() => {
@@ -18,19 +18,9 @@ export default function Responders() {
       setRespondersError(null);
 
       try {
-        const token = localStorage.getItem("token");
-        const res = await fetch(`${API_BASE_URL}/users?role=responder`, {
+        const payload = await apiRequest("/users?role=responder", {
           method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
         });
-
-        const payload = await res.json().catch(() => ({}));
-        if (!res.ok) {
-          throw new Error(payload?.message || "Failed to fetch responders.");
-        }
 
         const users = Array.isArray(payload?.data) ? payload.data : [];
         const responderUsers = users
@@ -219,10 +209,10 @@ export default function Responders() {
                             defaultResponderId
                         )
                       }
-                      disabled={!defaultResponderId || loadingResponders}
+                      disabled={!defaultResponderId || loadingResponders || requesting}
                       className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-2 rounded-lg font-semibold transition disabled:opacity-50"
                     >
-                      {loadingResponders ? "Loading..." : "Assign"}
+                      {loadingResponders || requesting ? "Loading..." : "Assign"}
                     </button>
                   </div>
                 </div>
@@ -233,8 +223,8 @@ export default function Responders() {
       )}
 
       <div className="bg-[#121f32] rounded-2xl border border-blue-500/10 overflow-hidden shadow-xl">
-
-        <table className="w-full text-sm">
+        <div className="w-full overflow-x-auto">
+        <table className="w-full min-w-[980px] text-sm">
           <thead className="bg-[#0f1b2a] text-slate-400 uppercase text-xs">
             <tr>
               <th className="px-6 py-4 text-left">Name</th>
@@ -339,9 +329,10 @@ export default function Responders() {
                                 responder.id
                             )
                           }
-                          className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-2 rounded-lg font-semibold transition"
+                          disabled={requesting}
+                          className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-2 rounded-lg font-semibold transition disabled:opacity-50"
                         >
-                          Assign
+                          {requesting ? "Loading..." : "Assign"}
                         </button>
                       </div>
                     ))}
@@ -352,6 +343,7 @@ export default function Responders() {
           </tbody>
 
         </table>
+        </div>
       </div>
     </div>
   );

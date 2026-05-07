@@ -1,6 +1,5 @@
 import { Outlet } from "react-router-dom";
 import AdminSidebar from "../components/admin/AdminSidebar";
-import AdminHeader from "../components/admin/AdminHeader";
 
 export default function AdminLayout() {
   return (
@@ -11,9 +10,6 @@ export default function AdminLayout() {
 
       {/* Main Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
-
-        <AdminHeader />
-
         <div className="flex-1 overflow-y-auto p-8 bg-gradient-to-br from-[#0b1420] to-[#0e1c2f]">
           <Outlet />
         </div>

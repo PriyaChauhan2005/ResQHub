@@ -1,4 +1,15 @@
+import { useState } from "react";
+
 export default function LayerToggle() {
+  const [activeLayer, setActiveLayer] = useState("Traffic");
+
+  const layerButtonClass = (name) =>
+    `px-3 py-1 rounded-full text-xs ${
+      activeLayer === name
+        ? "bg-blue-600 text-white"
+        : "bg-[#0b1420] text-slate-400"
+    }`;
+
   return (
     <div className="absolute top-6 right-6 bg-[#162435]/60 backdrop-blur-xl border border-white/10 p-4 rounded-2xl shadow-2xl shadow-blue-500/10 z-[1000] space-y-3">
 
@@ -7,13 +18,22 @@ export default function LayerToggle() {
       </p>
 
       <div className="flex gap-2">
-        <button className="px-3 py-1 bg-blue-600 rounded-full text-xs">
+        <button
+          onClick={() => setActiveLayer("Traffic")}
+          className={layerButtonClass("Traffic")}
+        >
           Traffic
         </button>
-        <button className="px-3 py-1 bg-[#0b1420] rounded-full text-xs text-slate-400">
+        <button
+          onClick={() => setActiveLayer("Hydrants")}
+          className={layerButtonClass("Hydrants")}
+        >
           Hydrants
         </button>
-        <button className="px-3 py-1 bg-[#0b1420] rounded-full text-xs text-slate-400">
+        <button
+          onClick={() => setActiveLayer("CCTV")}
+          className={layerButtonClass("CCTV")}
+        >
           CCTV
         </button>
       </div>

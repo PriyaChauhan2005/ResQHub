@@ -61,7 +61,7 @@ export default function VictimRegistry() {
     <div className="space-y-8">
 
       {/* HEADER */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white">
             Victim Registry
@@ -96,7 +96,8 @@ export default function VictimRegistry() {
       {/* TABLE */}
       <div className="bg-[#121f32] rounded-2xl border border-blue-500/10 overflow-hidden">
 
-        <table className="w-full text-sm">
+        <div className="w-full overflow-x-auto">
+        <table className="w-full min-w-[760px] text-sm">
           <thead className="bg-[#0f1b2a] text-slate-400 uppercase text-xs">
             <tr>
               <th className="px-6 py-4 text-left">ID</th>
@@ -178,6 +179,7 @@ export default function VictimRegistry() {
             )}
           </tbody>
         </table>
+        </div>
 
         {/* PAGINATION */}
         {totalPages > 1 && (

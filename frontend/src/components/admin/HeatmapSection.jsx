@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { useIncidents } from "../../context/IncidentContext";
 import {
   MapContainer,
   TileLayer,
@@ -49,24 +48,9 @@ const createCustomIcon = (color) =>
     popupAnchor: [0, -40],
   });
 
-export default function HeatmapSection() {
+export default function HeatmapSection({ incidents = [] }) {
   const [mode, setMode] = useState("intensity");
-  const { incidents, addIncident  } = useIncidents();
   const audioRef = useRef(null);
-
-  // 🔴 TEMP TEST INJECTION
-useEffect(() => {
-  if (incidents.length === 0) {
-    addIncident({
-      title: "Test High Severity",
-      severity: "HIGH",
-      location: {
-        lat: 28.6139,
-        lng: 77.209,
-      },
-    });
-  }
-}, []);
 
 
   // 🚨 Siren Trigger

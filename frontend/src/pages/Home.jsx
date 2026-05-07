@@ -1,9 +1,9 @@
 
 import { Link } from "react-router-dom";
 import Logo from "../assets/logo.png";
-import { useIncidents } from "../context/IncidentContext";
 import { useMemo, useEffect, useState } from "react";
 import useNetworkStatus from "../hooks/useNetworkStatus";
+import { apiRequest } from "../utils/api";
 
 
 /* ================= COUNT UP HOOK ================= */
@@ -33,62 +33,87 @@ function useCountUp(target, duration = 800) {
 
 export default function Home() {
   const isOnline = useNetworkStatus();
-  const { incidents } = useIncidents();
+  const [incidents, setIncidents] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const safeIncidents = useMemo(
+    () => (Array.isArray(incidents) ? incidents : []),
+    [incidents]
+  );
+  const safeUsers = useMemo(
+    () => (Array.isArray(users) ? users : []),
+    [users]
+  );
 
   /* ================= OPTIMIZED STATS ================= */
 
   const {
-    totalIncidents,
     activeIncidents,
+    respondersOnline,
     criticalAlerts,
-    resolvedIncidents,
     resolutionRate,
   } = useMemo(() => {
-    const total = incidents.length;
+    const total = safeIncidents.length;
 
-    const resolved = incidents.filter(
+    const resolved = safeIncidents.filter(
       (i) => i.status === "RESOLVED"
     ).length;
 
-    const active = incidents.filter(
-      (i) => i.status !== "RESOLVED"
+    const active = safeIncidents.filter(
+      (i) =>
+        i.status === "PENDING" ||
+        i.status === "ASSIGNED" ||
+        i.status === "IN_PROGRESS"
     ).length;
 
-    const critical = incidents.filter(
+    const critical = safeIncidents.filter(
       (i) =>
         i.severity === "HIGH" &&
         i.status !== "RESOLVED"
     ).length;
 
+    const onlineResponders = safeUsers.filter(
+      (u) => u.role === "responder"
+    ).length;
+
     return {
-      totalIncidents: total,
       activeIncidents: active,
+      respondersOnline: onlineResponders,
       criticalAlerts: critical,
-      resolvedIncidents: resolved,
       resolutionRate:
         total === 0
           ? 0
           : Math.round((resolved / total) * 100),
     };
-  }, [incidents]);
-
-  /* ================= LIVE RESPONDER SIMULATION ================= */
-
-  const [liveResponders, setLiveResponders] = useState(42);
+  }, [safeIncidents, safeUsers]);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setLiveResponders((prev) =>
-        prev + Math.floor(Math.random() * 2)
-      );
-    }, 4000);
+    const loadDashboardData = async () => {
+      setLoading(true);
+      try {
+        const [incidentsPayload, usersPayload] = await Promise.all([
+          apiRequest("/incidents", { method: "GET" }),
+          apiRequest("/users", { method: "GET" }),
+        ]);
 
-    return () => clearInterval(interval);
+        setIncidents(Array.isArray(incidentsPayload?.data) ? incidentsPayload.data : []);
+        setUsers(Array.isArray(usersPayload?.data) ? usersPayload.data : []);
+      } catch {
+        setIncidents([]);
+        setUsers([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadDashboardData();
   }, []);
 
   /* ================= ANIMATED VALUES ================= */
 
   const animatedActive = useCountUp(activeIncidents);
+  const animatedResponders = useCountUp(respondersOnline);
   const animatedCritical = useCountUp(criticalAlerts);
   const animatedRate = useCountUp(resolutionRate);
 
@@ -409,33 +434,34 @@ export default function Home() {
     <div className="hover:scale-105 transition">
       <p className="text-slate-400">Active Incidents</p>
       <p className="text-blue-400 text-xl font-bold mt-1">
-  {animatedActive}
+  {loading ? "Loading..." : animatedActive}
 </p>
     </div>
 
     <div className="hover:scale-105 transition">
       <p className="text-slate-400">Responders Online</p>
       <p className="text-green-400 text-xl font-bold mt-1">
-  {liveResponders}
+  {loading ? "Loading..." : animatedResponders}
 </p>
     </div>
 
     <div className="hover:scale-105 transition">
       <p className="text-slate-400">High Priority Alerts</p>
       <p className="text-red-400 text-xl font-bold mt-1">
-  {animatedCritical}</p>
+  {loading ? "Loading..." : animatedCritical}</p>
     </div>
 
     <div className="hover:scale-105 transition">
       <p className="text-slate-400">Resolution Rate</p>
       <p className="text-blue-400 text-xl font-bold mt-1">
-  {animatedRate}%
+  {loading ? "Loading..." : `${animatedRate}%`}
 </p>
     </div>
 
   </div>
 </section>
 
+      
 
       {/* ================= HOW IT WORKS ================= */}
       <section id="workflow" className="bg-[#0f1b2a] py-16 md:py-24 border-y border-blue-500/10">
